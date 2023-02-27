@@ -15,35 +15,41 @@
  *
  */
 
+import {
+  renderHotspot,
+  renderHotspots,
+} from "../../../components/utils/hotspot/render_hotspots.js";
 
-import {renderHotspot, renderHotspots} from '../../../components/utils/hotspot/render_hotspots.js';
-
-describe('renders hotspot test', () => {
-  it('renders a hotspot when given a valid config', () => {
-    const hotspot = renderHotspot({name: 'test', surface: 'data'});
-    expect(hotspot.dataset['surface']).toBe('data');
-    expect(hotspot.slot).toBe('hotspot-test');
+describe("renders hotspot test", () => {
+  it("renders a hotspot when given a valid config", () => {
+    const hotspot = renderHotspot({
+      name: "test",
+      type: "text",
+      surface: "data",
+    });
+    expect(hotspot.dataset["surface"]).toBe("data");
+    expect(hotspot.slot).toBe("hotspot-test");
   });
 
-  it('renders two hotspots when called with valid config', () => {
+  it("renders two hotspots when called with valid config", () => {
     const configs = [
-      {name: 'test-0', surface: 'data'},
-      {name: 'test-1', surface: 'data2'},
+      { name: "test-0", type: "text", surface: "data" },
+      { name: "test-1", type: "text", surface: "data2" },
     ];
     const hotspots = renderHotspots(configs);
     expect(hotspots).toBeDefined();
     expect(hotspots.length).toBe(2);
-    expect(hotspots[0].slot).toBe('hotspot-test-0');
-    expect(hotspots[1].slot).toBe('hotspot-test-1');
+    expect(hotspots[0].slot).toBe("hotspot-test-0");
+    expect(hotspots[1].slot).toBe("hotspot-test-1");
   });
 
-  it('throws an error when called with duplicated name', () => {
+  it("throws an error when called with duplicated name", () => {
     const configs = [
-      {name: 'test', surface: 'data'},
-      {name: 'test', surface: 'data2'},
+      { name: "test", type: "text", surface: "data" },
+      { name: "test", type: "text", surface: "data2" },
     ];
     expect(() => {
       renderHotspots(configs);
-    }).toThrow(new Error('Hotspot contains duplicate name: test'));
+    }).toThrow(new Error("Hotspot contains duplicate name: test"));
   });
 });

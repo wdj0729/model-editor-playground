@@ -15,7 +15,7 @@
  *
  */
 
-import {HotspotConfig} from '../../hotspot_panel/types.js';
+import { HotspotConfig } from "../../hotspot_panel/types.js";
 
 /**
  * Renders a list of hotspots
@@ -28,7 +28,7 @@ export function renderHotspots(hotspots: HotspotConfig[]) {
     }
     existingNames.add(hotspot.name);
   }
-  return hotspots.map(hotspot => renderHotspot(hotspot));
+  return hotspots.map((hotspot) => renderHotspot(hotspot));
 }
 
 /**
@@ -37,17 +37,49 @@ export function renderHotspots(hotspots: HotspotConfig[]) {
 export function renderHotspot(config: HotspotConfig) {
   // Note that we have to do this without lit html because rendering slot name
   // will result in zClosurez
-  const hotspotElement = document.createElement('button');
-  hotspotElement.classList.add('Hotspot');
+  const hotspotElement = document.createElement("button");
+  hotspotElement.classList.add("Hotspot");
   hotspotElement.slot = `hotspot-${config.name}`;
-  hotspotElement.dataset['surface'] = config.surface;
-  hotspotElement.dataset['visibilityAttribute'] = 'visible';
+  hotspotElement.dataset["surface"] = config.surface;
+  hotspotElement.dataset["visibilityAttribute"] = "visible";
 
-  if (config.annotation) {
-    const annotationElement = document.createElement('div');
-    annotationElement.classList.add('HotspotAnnotation');
-    annotationElement.textContent = config.annotation;
-    hotspotElement.appendChild(annotationElement);
+  console.log(config.type);
+
+  switch (config.type) {
+    case "text":
+      if (config.annotation) {
+        const annotationElement = document.createElement("div");
+        annotationElement.classList.add("HotspotAnnotation");
+        annotationElement.textContent = config.annotation;
+        hotspotElement.appendChild(annotationElement);
+      }
+      break;
+    case "video":
+      if (config.annotation) {
+        const annotationElement = document.createElement("iframe");
+        annotationElement.classList.add("HotspotAnnotation");
+        annotationElement.src = config.annotation.replace("watch?v=", "embed/");
+        annotationElement.style.maxWidth = "300px";
+        annotationElement.style.height = "238px";
+        hotspotElement.appendChild(annotationElement);
+      }
+      break;
+    case "image":
+      if (config.annotation) {
+        const annotationElement = document.createElement("img");
+        annotationElement.classList.add("HotspotAnnotation");
+        annotationElement.src = config.annotation;
+        hotspotElement.appendChild(annotationElement);
+      }
+      break;
+    default:
+      if (config.annotation) {
+        const annotationElement = document.createElement("div");
+        annotationElement.classList.add("HotspotAnnotation");
+        annotationElement.textContent = config.annotation;
+        hotspotElement.appendChild(annotationElement);
+      }
+      break;
   }
 
   return hotspotElement;

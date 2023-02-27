@@ -20,40 +20,79 @@
  * settings applied to the GLB.
  */
 
-import '@material/mwc-icon-button';
+import "@material/mwc-icon-button";
 
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {html} from 'lit';
-import {customElement, query, state} from 'lit/decorators.js';
+import { ModelViewerElement } from "@google/model-viewer/lib/model-viewer";
+import { html } from "lit";
+import { customElement, query, state } from "lit/decorators.js";
 
-import {reduxStore} from '../../space_opera_base.js';
-import {modelViewerPreviewStyles} from '../../styles.css.js';
-import {ArConfigState, BestPracticesState, extractStagingConfig, ModelViewerConfig, State} from '../../types.js';
-import {getBestPractices} from '../best_practices/reducer.js';
-import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
-import {dispatchCameraIsDirty} from '../camera_settings/reducer.js';
-import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
-import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
-import {HotspotConfig} from '../hotspot_panel/types.js';
-import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
-import {dispatchSetForcePost, getArConfig, getRefreshable} from '../mobile_view/reducer.js';
-import {getExtraAttributes} from '../model_viewer_snippet/reducer.js';
-import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
-import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
-import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
-import {renderModelViewer} from '../utils/render_model_viewer.js';
+import { reduxStore } from "../../space_opera_base.js";
+import { modelViewerPreviewStyles } from "../../styles.css.js";
+import {
+  ArConfigState,
+  BestPracticesState,
+  extractStagingConfig,
+  ModelViewerConfig,
+  State,
+} from "../../types.js";
+import { getBestPractices } from "../best_practices/reducer.js";
+import { arButtonCSS, progressBarCSS } from "../best_practices/styles.css.js";
+import { dispatchCameraIsDirty } from "../camera_settings/reducer.js";
+import {
+  dispatchAutoplayEnabled,
+  dispatchCameraControlsEnabled,
+  dispatchConfig,
+  dispatchEnvrionmentImage,
+  getConfig,
+} from "../config/reducer.js";
+import { ConnectedLitElement } from "../connected_lit_element/connected_lit_element.js";
+import {
+  dispatchAddHotspot,
+  dispatchSetHotspots,
+  dispatchUpdateHotspotMode,
+  generateUniqueHotspotName,
+  generateMIMEType,
+  getHotspotMode,
+  getHotspots,
+} from "../hotspot_panel/reducer.js";
+import { HotspotConfig } from "../hotspot_panel/types.js";
+import {
+  createBlobUrlFromEnvironmentImage,
+  dispatchAddEnvironmentImage,
+} from "../ibl_selector/reducer.js";
+import {
+  dispatchSetForcePost,
+  getArConfig,
+  getRefreshable,
+} from "../mobile_view/reducer.js";
+import { getExtraAttributes } from "../model_viewer_snippet/reducer.js";
+import {
+  dispatchSetEnvironmentName,
+  dispatchSetModelName,
+} from "../relative_file_paths/reducer.js";
+import { createSafeObjectUrlFromArrayBuffer } from "../utils/create_object_url.js";
+import { styles as hotspotStyles } from "../utils/hotspot/hotspot.css.js";
+import { renderModelViewer } from "../utils/render_model_viewer.js";
 
-import {dispatchGltfUrl, dispatchModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
+import {
+  dispatchGltfUrl,
+  dispatchModel,
+  getGltfUrl,
+  renderCommonChildElements,
+} from "./reducer.js";
 
 /**
  * Renders and updates the model-viewer tag, serving as a preview of the edits.
  */
-@customElement('model-viewer-preview')
+@customElement("model-viewer-preview")
 export class ModelViewerPreview extends ConnectedLitElement {
-  static styles =
-      [modelViewerPreviewStyles, hotspotStyles, arButtonCSS, progressBarCSS];
-  @query('model-viewer') readonly modelViewer!: ModelViewerElement;
+  static styles = [
+    modelViewerPreviewStyles,
+    hotspotStyles,
+    arButtonCSS,
+    progressBarCSS,
+  ];
+  @query("model-viewer") readonly modelViewer!: ModelViewerElement;
   @state() config: ModelViewerConfig = {};
   @state() arConfig: ArConfigState = {};
   @state() hotspots: HotspotConfig[] = [];
@@ -88,11 +127,11 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   firstUpdated() {
-    this.addEventListener('drop', this.onDrop);
-    this.addEventListener('dragover', this.onDragover);
+    this.addEventListener("drop", this.onDrop);
+    this.addEventListener("dragover", this.onDragover);
     (self as any).ModelViewerElement = (self as any).ModelViewerElement || {};
     (self as any).ModelViewerElement.meshoptDecoderLocation =
-        'https://unpkg.com/meshoptimizer/meshopt_decoder.js';
+      "https://unpkg.com/meshoptimizer/meshopt_decoder.js";
   }
 
   forcePost() {
@@ -105,60 +144,71 @@ export class ModelViewerPreview extends ConnectedLitElement {
       src: this.gltfUrl,
       // Always enable camera controls for preview
       cameraControls: true,
-      interactionPrompt: 'none'
+      interactionPrompt: "none",
     };
 
     const hasModel = !!editedConfig.src;
 
-    const refreshMobileButton = this.refreshButtonIsReady === true ? html
-    `<mwc-button icon="cached" @click=${this.forcePost}
-      style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
-      Refresh Mobile
-    </mwc-button>`: html``;
+    const refreshMobileButton =
+      this.refreshButtonIsReady === true
+        ? html`<mwc-button
+            icon="cached"
+            @click=${this.forcePost}
+            style="--mdc-theme-primary: #DC143C; border: #DC143C"
+            class="RefreshMobileButton"
+          >
+            Refresh Mobile
+          </mwc-button>`
+        : html``;
 
     // Renders elements common between mobile and editor.
-    const childElements =
-        renderCommonChildElements(this.hotspots, this.bestPractices!, true);
+    const childElements = renderCommonChildElements(
+      this.hotspots,
+      this.bestPractices!,
+      true
+    );
 
     // Add additional elements, editor specific.
     childElements.push(refreshMobileButton);
     if (!hasModel) {
       childElements.push(
-          html
-          `<div class="HelpText">Drag a glTF or GLB here!<br/>
-          <small>Groups, folders, and Zip archives supported</small><br/>
-          <small>Drop an HDR for lighting</small></div>`);
+        html`<div class="HelpText">
+          Drag a glTF or GLB here!<br />
+          <small>Groups, folders, and Zip archives supported</small><br />
+          <small>Drop an HDR for lighting</small>
+        </div>`
+      );
     }
 
-    return html`${
-        renderModelViewer(
-            editedConfig,
-            this.arConfig,
-            this.extraAttributes,
-            {
-              load: () => {
-                this.onModelLoaded();
-              },
-              cameraChange: () => {
-                this.onCameraChange();
-              },
-              click: (event: MouseEvent) => {
-                if (this.addHotspotMode) {
-                  this.addHotspot(event);
-                }
-              }
-            },
-            childElements)}`;
+    return html`${renderModelViewer(
+      editedConfig,
+      this.arConfig,
+      this.extraAttributes,
+      {
+        load: () => {
+          this.onModelLoaded();
+        },
+        cameraChange: () => {
+          this.onCameraChange();
+        },
+        click: (event: MouseEvent) => {
+          if (this.addHotspotMode) {
+            this.addHotspot(event);
+          }
+        },
+      },
+      childElements
+    )}`;
   }
 
   // Handle the case when the model is loaded for the first time.
   private async onModelLoaded() {
     reduxStore.dispatch(await dispatchModel());
     if (this.modelViewer.availableAnimations.length > 0) {
-          reduxStore.dispatch(dispatchAutoplayEnabled(true));
+      reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
     const config = getConfig(reduxStore.getState());
-    reduxStore.dispatch(dispatchConfig({...config}));
+    reduxStore.dispatch(dispatchConfig({ ...config }));
     this.resolveLoad();
   }
 
@@ -167,22 +217,26 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private addHotspot(event: MouseEvent) {
-    const surface =
-        this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
+    const surface = this.modelViewer.surfaceFromPoint(
+      event.clientX,
+      event.clientY
+    );
     if (!surface) {
-          console.log('Click was not on model, no hotspot added.');
-          return;
+      console.log("Click was not on model, no hotspot added.");
+      return;
     }
-    reduxStore.dispatch(dispatchAddHotspot({
-      name: generateUniqueHotspotName(),
-      surface,
-    }));
+    reduxStore.dispatch(
+      dispatchAddHotspot({
+        name: generateUniqueHotspotName(),
+        type: generateMIMEType(),
+        surface,
+      })
+    );
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }
 
   private onDragover(event: DragEvent) {
-    if (!event.dataTransfer)
-          return;
+    if (!event.dataTransfer) return;
 
     event.stopPropagation();
     event.preventDefault();
@@ -192,33 +246,32 @@ export class ModelViewerPreview extends ConnectedLitElement {
     event.stopPropagation();
     event.preventDefault();
 
-    if (event.dataTransfer && event.dataTransfer.items[0].kind === 'file') {
-          const file = event.dataTransfer.items[0].getAsFile();
-          if (!file)
-            return;
-          if (file.name.match(/\.(glb|gltf)$/i)) {
-            const arrayBuffer = await file.arrayBuffer();
-            reduxStore.dispatch(dispatchSetModelName(file.name));
-            const url =
-                createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-            reduxStore.dispatch(dispatchGltfUrl(url));
-            dispatchConfig(extractStagingConfig(this.config));
-            reduxStore.dispatch(dispatchCameraControlsEnabled(true));
-            reduxStore.dispatch(dispatchSetHotspots([]));
-          }
-          if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
-            const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
-            reduxStore.dispatch(
-                dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
-            reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
-            reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
-          }
+    if (event.dataTransfer && event.dataTransfer.items[0].kind === "file") {
+      const file = event.dataTransfer.items[0].getAsFile();
+      if (!file) return;
+      if (file.name.match(/\.(glb|gltf)$/i)) {
+        const arrayBuffer = await file.arrayBuffer();
+        reduxStore.dispatch(dispatchSetModelName(file.name));
+        const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
+        reduxStore.dispatch(dispatchGltfUrl(url));
+        dispatchConfig(extractStagingConfig(this.config));
+        reduxStore.dispatch(dispatchCameraControlsEnabled(true));
+        reduxStore.dispatch(dispatchSetHotspots([]));
+      }
+      if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
+        const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
+        reduxStore.dispatch(
+          dispatchAddEnvironmentImage({ uri: unsafeUrl, name: file.name })
+        );
+        reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+        reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
+      }
     }
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'model-viewer-preview': ModelViewerPreview;
+    "model-viewer-preview": ModelViewerPreview;
   }
 }
