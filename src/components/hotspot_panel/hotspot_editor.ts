@@ -15,61 +15,87 @@
  *
  */
 
-import '../shared/expandable_content/expandable_tab.js';
-import '../shared/section_row/section_row.js';
-import '@material/mwc-icon-button';
+import "../shared/expandable_content/expandable_tab.js";
+import "../shared/section_row/section_row.js";
+import "../shared/dropdown/dropdown.js";
+import "@material/mwc-icon-button";
 
-import {html, LitElement, PropertyValues} from 'lit';
-import {customElement, property, query} from 'lit/decorators.js';
+import { html, LitElement, PropertyValues } from "lit";
+import { customElement, property, query } from "lit/decorators.js";
 
-import {reduxStore} from '../../space_opera_base.js';
+import { reduxStore } from "../../space_opera_base.js";
 
-import {hotspotEditorStyles} from '../../styles.css.js';
-import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
-import {HotspotConfig} from './types.js';
+import { hotspotEditorStyles } from "../../styles.css.js";
+import { dispatchRemoveHotspot, dispatchUpdateHotspot } from "./reducer.js";
+import { HotspotConfig } from "./types.js";
+import { Dropdown } from "../shared/dropdown/dropdown.js";
+
+const types = ["text", "video", "image"];
 
 /** A editor card for a single hotspot */
-@customElement('me-hotspot-editor')
+@customElement("me-hotspot-editor")
 export class HotspotEditorElement extends LitElement {
   static styles = hotspotEditorStyles;
 
-  @property({type: Object}) config?: HotspotConfig;
-  @query('textarea#annotation') annotationInput!: HTMLTextAreaElement;
+  @property({ type: Object }) config?: HotspotConfig;
+  @query("textarea#annotation") annotationInput!: HTMLTextAreaElement;
 
   updated(properties: PropertyValues) {
-    if (properties.has('config')) {
-      this.annotationInput.value = this.config?.annotation || '';
+    if (properties.has("config")) {
+      this.annotationInput.value = this.config?.annotation || "";
     }
   }
 
   render() {
-    if (!this.config)
-      return html``;
+    if (!this.config) return html``;
 
     return html`
-    <me-section-row label="Label:">
-      <textarea id="annotation" @input=${this.onAnnotationInput}>${
-        this.config.annotation}</textarea>
-      <mwc-icon-button id="remove-hotspot"
-        icon="delete"
-        @click="${this.onRemoveHotspot}"></mwc-icon-button>
-    </me-section-row>
+      <div slot="content">
+        <me-dropdown id="hotspot-type-selector" @select=${this.onTypeChange}>
+          ${types.map((item) => {
+            return html` <paper-item value="${item}">${item}</paper-item>`;
+          })}
+        </me-dropdown>
+        <me-section-row class="Row">
+          <textarea id="annotation" @input=${this.onAnnotationInput}>
+${this.config.annotation}</textarea
+          >
+          <mwc-icon-button
+            id="remove-hotspot"
+            icon="delete"
+            @click="${this.onRemoveHotspot}"
+          ></mwc-icon-button>
+        </me-section-row>
+      </div>
     `;
   }
 
-  onAnnotationInput() {
-    if (!this.annotationInput)
-      return;
+  onTypeChange(event: CustomEvent) {
+    const dropdown = event.target as Dropdown;
+    const value = dropdown.selectedItem?.getAttribute("value") || undefined;
+    // Autoplay must be enabled otherwise the animation won't play and the
+    // console throws a warning.
+    if (!this.annotationInput) return;
     const newConfig = {
       ...this.config,
-      annotation: this.annotationInput.value
+      type: value,
+      annotation: this.annotationInput.value,
+    } as HotspotConfig;
+    reduxStore.dispatch(dispatchUpdateHotspot(newConfig));
+  }
+
+  onAnnotationInput() {
+    if (!this.annotationInput) return;
+    const newConfig = {
+      ...this.config,
+      annotation: this.annotationInput.value,
     } as HotspotConfig;
     reduxStore.dispatch(dispatchUpdateHotspot(newConfig));
   }
 
   onRemoveHotspot() {
     if (!this.config) {
-      throw new Error('Invalid config');
+      throw new Error("Invalid config");
     }
     reduxStore.dispatch(dispatchRemoveHotspot(this.config.name));
   }
@@ -77,6 +103,6 @@ export class HotspotEditorElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'me-hotspot-editor': HotspotEditorElement;
+    "me-hotspot-editor": HotspotEditorElement;
   }
 }

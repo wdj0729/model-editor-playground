@@ -15,10 +15,10 @@
  *
  */
 
-import {Action, State} from '../../types.js';
-import {immutableArrayUpdate} from '../utils/reducer_utils.js';
+import { Action, State } from "../../types.js";
+import { immutableArrayUpdate } from "../utils/reducer_utils.js";
 
-import {HotspotConfig} from './types.js';
+import { HotspotConfig } from "./types.js";
 
 let nextHotspotId = 1;
 let hotspotNameSet = new Set();
@@ -30,6 +30,11 @@ export function generateUniqueHotspotName() {
     name = (nextHotspotId++).toString();
   }
   return name;
+}
+
+export function generateMIMEType() {
+  let type = "text";
+  return type;
 }
 
 /**
@@ -67,40 +72,42 @@ function removeHotspot(state: HotspotConfig[], name: string) {
   return hotspots;
 }
 
-const SET_HOTSPOTS = 'SET_HOTSPOTS';
+const SET_HOTSPOTS = "SET_HOTSPOTS";
 export function dispatchSetHotspots(hotspots: HotspotConfig[]) {
-  hotspotNameSet = new Set(hotspots.map(hotspot => hotspot.name));
+  hotspotNameSet = new Set(hotspots.map((hotspot) => hotspot.name));
   nextHotspotId = 1;
-  return {type: SET_HOTSPOTS, payload: hotspots};
+  return { type: SET_HOTSPOTS, payload: hotspots };
 }
 
-const CLEAR_HOTSPOTS = 'CLEAR_HOTSPOTS';
+const CLEAR_HOTSPOTS = "CLEAR_HOTSPOTS";
 export function dispatchClearHotspot() {
   hotspotNameSet.clear();
   nextHotspotId = 1;
-  return {type: CLEAR_HOTSPOTS, payload: []};
+  return { type: CLEAR_HOTSPOTS, payload: [] };
 }
 
-const REMOVE_HOTSPOT = 'REMOVE_HOTSPOT';
+const REMOVE_HOTSPOT = "REMOVE_HOTSPOT";
 export function dispatchRemoveHotspot(name?: string) {
-  return {type: REMOVE_HOTSPOT, payload: name};
+  return { type: REMOVE_HOTSPOT, payload: name };
 }
 
-const UPDATE_HOTSPOT = 'UPDATE_HOTSPOT';
+const UPDATE_HOTSPOT = "UPDATE_HOTSPOT";
 export function dispatchUpdateHotspot(config?: HotspotConfig) {
-  return {type: UPDATE_HOTSPOT, payload: config};
-};
+  return { type: UPDATE_HOTSPOT, payload: config };
+}
 
-const ADD_HOTSPOT = 'ADD_HOTSPOT';
+const ADD_HOTSPOT = "ADD_HOTSPOT";
 export function dispatchAddHotspot(config?: HotspotConfig) {
-  return {type: ADD_HOTSPOT, payload: config};
+  return { type: ADD_HOTSPOT, payload: config };
 }
 
 export const getHotspots = (state: State) =>
-    state.entities.modelViewerSnippet.hotspots;
+  state.entities.modelViewerSnippet.hotspots;
 
 export function hotspotsReducer(
-    state: HotspotConfig[] = [], action: Action): HotspotConfig[] {
+  state: HotspotConfig[] = [],
+  action: Action
+): HotspotConfig[] {
   switch (action.type) {
     case SET_HOTSPOTS:
       return action.payload;
@@ -117,23 +124,25 @@ export function hotspotsReducer(
   }
 }
 
-const UPDATE_HOTSPOT_MODE = 'UPDATE_HOTSPOT_MODE';
+const UPDATE_HOTSPOT_MODE = "UPDATE_HOTSPOT_MODE";
 export function dispatchUpdateHotspotMode(addHotspot: boolean) {
-  return {type: UPDATE_HOTSPOT_MODE, payload: addHotspot};
+  return { type: UPDATE_HOTSPOT_MODE, payload: addHotspot };
 }
 
 export const getHotspotMode = (state: State) => state.ui.hotspots.addHotspot;
 
 export function hotspotsUiReducer(
-    state = {
-      addHotspot: false
-    },
-    action: Action) {
+  state = {
+    addHotspot: false,
+  },
+  action: Action
+) {
   switch (action.type) {
     case UPDATE_HOTSPOT_MODE:
       return {
-        ...state, addHotspot: action.payload
-      }
+        ...state,
+        addHotspot: action.payload,
+      };
     default:
       return state;
   }
