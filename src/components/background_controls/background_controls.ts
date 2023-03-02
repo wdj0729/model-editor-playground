@@ -26,8 +26,8 @@ import { ConnectedLitElement } from "../connected_lit_element/connected_lit_elem
 import { Dropdown } from "../shared/dropdown/dropdown.js";
 
 const colors = [
-  "none",
-  "red",
+  "None",
+  "Red",
   "Cyan",
   "Blue",
   "DarkBlue",
